@@ -1,0 +1,3 @@
+[submodule "resiprocate"]
+	path = resiprocate
+	url = https://github.com/resiprocate/resiprocate
