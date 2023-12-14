@@ -1,0 +1,78 @@
+Name: libsipXmediaAdapter
+Summary: OS Abstraction and OS Utilities library for sipX modules
+Version: 3.3.0
+Release: 0
+Group: Development/Libraries
+License: Pingtel Commercial License
+URL: https://github.com/sipXtapi/sipXtapi
+SCM: https://github.com/sipXtapi/sipXtapi
+Sources:
+    - 'sipXtapi-%{version}_%{extraver}.tar.xz'
+Description: |
+    %{summary}
+
+    %if "%{?vendor}" == "chum"
+    PackagedBy: nephros
+    Categories:
+     - Library
+    Custom:
+      Repo: %{url}
+    Links:
+      Homepage: %{url}
+      Help: %{url}/discussions
+      Bugtracker: %{url}/issues
+    %endif
+
+SetupOptions: -q -n sipXtapi-%{version}_%{extraver}
+RpmLintIgnore:
+  - 'summary-too-long'
+  - 'no-changelogname-tag'
+  - 'invalid-url'
+Macros:
+  # 'extraver;test18'
+  - 'extraver;20231108'
+  # 'pkgconfigdir;%{_prefix}/lib/pkgconfig'
+  - 'sover;2'
+  # 'lname;lib%{name}'
+  # 'lname;lib%{name}%{sover}'
+#  - '__cmake_in_source_build;OFF'
+#  - 'foo;bar'
+#  - |
+#    spectacle_bug; hack_fix
+#    # Spectacular spectacle hack:
+#    #   abuse Macros to work around the Macro-deleting bug in 0.32
+#    #   also, add a conditional dep:
+#    %if 0%{?sailfishos_version} >= 30400
+#    BuildRequires: some-package
+#    %endif
+Patches:
+  # 0001-Use-own-gettid.patch
+  # 0002-debian-openssl11.patch
+  - 0003-pcre-patch.patch
+PkgBR:
+  - libsipXport-devel
+  - libsipXmedia-devel
+  - libsipXsdp-devel
+  # libsipXtack-devel
+PkgConfigBR:
+  - alsa
+  - opus
+  - speex
+  - speexdsp
+  - openssl
+  - libpcre
+Configure: none
+Builder: none
+Files:
+  - '%{_libdir}/libsipXmediaProcessing.la'
+  # '%{_libdir}/%{name}.so'
+SubPackages:
+    - Name:  devel
+      Summary: Header files and library symbolic links for %{name}
+      Group: Development
+      Files:
+        # '%{_bindir}/sipxmedialib-config'
+        # '%{_libdir}/%{name}.a'
+        - '%{_libdir}/libsipXmediaProcessing.a'
+        - '%{_includedir}/%{name}'
+

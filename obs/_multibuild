@@ -1,4 +1,9 @@
 <multibuild>
   <flavor>asio</flavor>
   <flavor>opensigcomp</flavor>
+  <flavor>libsipXport</flavor>
+  <flavor>libsipXsdp</flavor>
+  <flavor>libsipXtack</flavor>
+  <flavor>libsipXmedia</flavor>
+  <flavor>libsipXmediaAdapter</flavor>
 </multibuild>
