@@ -1,3 +1,6 @@
 [submodule "resiprocate"]
 	path = resiprocate
 	url = https://github.com/resiprocate/resiprocate
+[submodule "sipXtapi"]
+	path = sipXtapi
+	url = https://github.com/sipXtapi/sipXtapi
