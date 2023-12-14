@@ -1,0 +1,47 @@
+Name: asio
+Summary: ASIO library
+Version: 1.14.0
+Release: 0
+Group: Applications
+License: GPLv3 or OpenSSL
+Group: Qt/Qt
+SCM: https://github.com/resiprocate/resiprocate
+URL: https://www.resiprocate.org/
+License: ASL 2.0
+Sources:
+    - 'resiprocate-1.12.0.tar.gz'
+Description: |
+    %{summary}.
+
+    %if "%{?vendor}" == "chum"
+    PackagedBy: nephros
+    Categories:
+     - Library
+    Custom:
+      Repo: https://github.com/resiprocate/resiprocate
+    PackageIcon: https://avatars.githubusercontent.com/u/2827263?s=48&v=4
+    %endif
+
+SetupOptions: -q -n resiprocate-resiprocate-1.12.0
+RpmLintIgnore:
+  - 'summary-too-long'
+  - 'no-changelogname-tag'
+  - 'invalid-url'
+PkgBR:
+  - pkgconfig
+PkgConfigBR:
+  - libcrypto
+  - python3
+#ConfigOptions:
+#  - '--help'
+
+#Files:
+#  - '%{_libdir}/*.so.*'
+
+SubPackages:
+    - Name: devel
+      Summary: Development files for %{name}
+      Group: Development
+      Files:
+        - '%{_includedir}/asio'
+        - '%{_includedir}/asio.hpp'

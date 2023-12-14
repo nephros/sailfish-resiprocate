@@ -1,0 +1,4 @@
+<multibuild>
+  <flavor>asio</flavor>
+  <flavor>opensigcomp</flavor>
+</multibuild>

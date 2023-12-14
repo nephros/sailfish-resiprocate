@@ -1,0 +1,48 @@
+Name: telepathy-resiprocate
+Summary: A SIP connection manager
+Version: 1.12.0
+Release: 0
+Group: Applications
+License: GPLv3 or OpenSSL
+Group: Qt/Qt
+SCM: https://github.com/resiprocate/resiprocate
+URL: https://www.resiprocate.org/
+License: ASL 2.0
+Sources:
+    - '%{name}-%{version}.tar.bz2'
+Description: |
+
+
+    %if "%{?vendor}" == "chum"
+    Title: Telepathy Resiprocate
+    PackagedBy: nephros
+    Categories:
+     - Library
+    Custom:
+      Repo: https://github.com/resiprocate/resiprocate
+    PackageIcon: https://avatars.githubusercontent.com/u/2827263?s=48&v=4
+    %endif
+
+SetupOptions: -q -n %{name}-%{version}
+RpmLintIgnore:
+  - 'summary-too-long'
+  - 'no-changelogname-tag'
+  - 'invalid-url'
+  - 'desktopfile-without-binary'
+  - 'explicit-lib-dependency'
+#Requires:
+#  - libsailfishapp-launcher
+PkgBR:
+  - cmake
+PkgConfigBR:
+  - Qt5Core
+  - TelepathyQt5
+  - libpcrecpp
+Configure: cmake
+#Builder: cmake
+NoIconCache: true
+#BuildArch: noarch
+#AutoSubPackages:
+#  - doc
+Files:
+  - '%license LICENSE.txt'

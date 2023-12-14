@@ -1,0 +1,65 @@
+diff -Naur a/configure.ac b/configure.ac
+--- a/configure.ac	2020-05-09 13:55:09.000000000 +0200
++++ b/configure.ac	2023-12-14 14:39:37.000000000 +0100
+@@ -194,7 +194,9 @@
+ 
+ AC_ARG_WITH(sigcomp,
+ [  --with-sigcomp          Link against Open SigComp libraries for SigComp],
+- AC_DEFINE_UNQUOTED(USE_SIGCOMP, , USE_SIGCOMP), )
++ [AC_DEFINE_UNQUOTED(USE_SIGCOMP, , USE_SIGCOMP),
++ AC_SUBST(LIBOPENSIGCOMP_LIBADD, "-lopensigcomp")],
++ [ AC_SUBST(LIBOPENSIGCOMP_LIBADD, "")])
+ 
+ AC_ARG_ENABLE(android,
+ [  --enable-android        Enable Android build],
+diff -Naur a/resip/stack/ConnectionBase.cxx b/resip/stack/ConnectionBase.cxx
+--- a/resip/stack/ConnectionBase.cxx	2020-05-09 13:55:09.000000000 +0200
++++ b/resip/stack/ConnectionBase.cxx	2023-12-14 14:39:37.000000000 +0100
+@@ -918,10 +918,10 @@
+                 *mSigcompFramer, uncompressed, 65536, sc)) > 0)
+   {
+     DebugLog (<< "Uncompressed Connection-oriented message");
+-    mMessage = new SipMessage(mWho.transport);
++    mMessage = new SipMessage(&mTransport->getTuple());
+ 
+     mMessage->setSource(mWho);
+-    mMessage->setTlsDomain(mWho.transport->tlsDomain());
++    mMessage->setTlsDomain(mTransport->tlsDomain());
+ 
+ #ifdef USE_SSL
+     // Set TlsPeerName if message is from TlsConnection
+diff -Naur a/resip/stack/Makefile.am b/resip/stack/Makefile.am
+--- a/resip/stack/Makefile.am	2020-05-09 13:55:09.000000000 +0200
++++ b/resip/stack/Makefile.am	2023-12-14 14:39:37.000000000 +0100
+@@ -39,6 +39,7 @@
+ lib_LTLIBRARIES = libresip.la
+ 
+ libresip_la_LIBADD = ../../rutil/librutil.la
++libresip_la_LIBADD += @LIBOPENSIGCOMP_LIBADD@
+ libresip_la_LIBADD += @LIBSSL_LIBADD@
+ libresip_la_LIBADD += @LIBSTL_LIBADD@
+ libresip_la_LDFLAGS = @LIBTOOL_VERSION_RELEASE@ -export-dynamic
+diff -Naur a/resip/stack/ssl/DtlsTransport.cxx b/resip/stack/ssl/DtlsTransport.cxx
+--- a/resip/stack/ssl/DtlsTransport.cxx	2020-05-09 13:55:09.000000000 +0200
++++ b/resip/stack/ssl/DtlsTransport.cxx	2023-12-14 14:39:37.000000000 +0100
+@@ -523,7 +523,7 @@
+ 
+        expected = sm->getDatagramLength();
+ 
+-       count = SSL_Write(ssl,
++       count = SSL_write(ssl,
+                          sm->getDatagramMessage(),
+                          sm->getDatagramLength());
+        delete sm;
+diff -Naur a/resip/stack/UdpTransport.cxx b/resip/stack/UdpTransport.cxx
+--- a/resip/stack/UdpTransport.cxx	2020-05-09 13:55:09.000000000 +0200
++++ b/resip/stack/UdpTransport.cxx	2023-12-14 14:39:37.000000000 +0100
+@@ -548,7 +548,7 @@
+ 
+       if (nack)
+       {
+-         mTxFifo.add(new SendData(tuple,
++         mTxFifo.add(new SendData(sender,
+                                   Data(nack->getDatagramMessage(),
+                                        nack->getDatagramLength()),
+                                   Data::Empty,

@@ -1,0 +1,133 @@
+Name: resiprocate
+Summary: A SIP connection manager
+Version: 1.12.0
+Release: 0
+Group: Applications
+License: GPLv3 or OpenSSL
+SCM: https://github.com/resiprocate/resiprocate
+URL: https://www.resiprocate.org/
+License: ASL 2.0
+Sources:
+    - '%{name}-%{version}.tar.gz'
+Patches:
+  - 01-srtp2.patch
+  # https://github.com/resiprocate/resiprocate/commit/590f60fff0f33b75a4b124dd9d84688cd2e66b4f
+  # 10-resip-stack-bring-OpenSigComp-specific-code-up-to-date.patch
+  # same, edited for 1.12.0
+  - 11-resip-stack-bring-OpenSigComp-specific-code-up-to-date.patch
+Description: |
+    %{summary}.
+
+    %if "%{?vendor}" == "chum"
+    Title: Resiprocate
+    PackagedBy: nephros
+    Categories:
+     - Library
+    Custom:
+      Repo: https://github.com/resiprocate/resiprocate
+    PackageIcon: https://avatars.githubusercontent.com/u/2827263?s=48&v=4
+    %endif
+
+SetupOptions: -q -n %{name}-%{name}-%{version}
+RpmLintIgnore:
+  - 'summary-too-long'
+  - 'no-changelogname-tag'
+  - 'invalid-url'
+  - 'desktopfile-without-binary'
+  - 'explicit-lib-dependency'
+PkgBR:
+  - pkgconfig
+  - python3-pycxx-devel
+  # we need asio.hpp, that's either from boost, or libasio
+  - boost-devel
+  - asio-devel
+  - opensigcomp-devel
+  - radcli-devel
+  - libsipXport-devel
+  - libsipXmedia-devel
+  - libsipXmediaAdapter-devel
+  - libsipXsdp-devel
+  - libsipXtack-devel
+  - vim-common # for xxd
+PkgConfigBR:
+  - alsa
+  - Qt5Core
+  - Qt5DBus
+  - Qt5Network
+  - TelepathyQt5
+  # gstreamermm-1.0
+  - libcares
+  - libcrypto
+  - libpcrecpp
+  - libsrtp2
+  - popt
+  - python3
+Builder: none
+Configure: reconfigure
+ConfigOptions:
+  # '--help'
+  - 'PKG_CONFIG_PATH="%{_libdir}/pkgconfig:${_prefix}/lib/pkgconfig:%{_datadir}/pkgconfig"'
+  - 'PYCXX_SRCDIR="%{_datadir}/python%{python3_version}/CXX"'
+  - '--enable-static'
+  - '--disable-pedantic-stack'
+  - '--disable-assert-syslog'
+  - '--disable-repro-plugins'
+  # '--enable-dtls'
+  # '--disable-dtls'
+  - '--enable-ipv6'
+  - '--with-popt'
+  - '--with-ssl'
+  - '--with-telepathy'
+  - '--without-c-ares'
+  - '--without-apps'
+  - '--without-geoip'
+  - '--without-ichat-gw'
+  - '--without-mysql'
+  - '--without-netsnmp'
+  - '--without-p2p'
+  - '--without-postgresql'
+  - '--without-python'
+  - '--with-radcli'
+  - '--without-radius'
+  - '--without-recon'
+  - '--without-rend'
+  - '--without-repro'
+  # '--without-return'
+  - '--with-sigcomp'
+  - '--without-tfm'
+NoIconCache: true
+NoFiles: true
+SubPackages:
+    - Name: '%{name}-libs'
+      AsWholeName: true
+      Summary: Libraries for %{name}
+      Group: Libraries
+      Files:
+        - '%{_libdir}/*'
+    - Name: telepathy-%{name}
+      AsWholeName: true
+      Summary: a connection manager for the Telepathy framework
+      Group: Applications
+      Description: |
+        %{summary}
+
+        It uses the TelepathyQt API to interact with DBus.
+
+        It uses the high level reCon API from reSIProcate to co-ordinate
+        SIP and media streams.  reCon also supports conferencing.
+        The media stack from the sipXtapi project is used.
+      Files:
+         - '%license apps/telepathy/LICENSE.txt'
+         - '%{_bindir}/telepathy-resiprocate'
+         - '%{_datadir}/dbus-1/services/*'
+#    - Name: recon
+#      Summary: Development files for %{name}
+#      Group: Applications
+#      Files:
+#    - Name: devel
+#      Summary: Development files for %{name}
+#      Group: Development
+#      Files:
+#        # '%{_includedir}/*'
+
+
