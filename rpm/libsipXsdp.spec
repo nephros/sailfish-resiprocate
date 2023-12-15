@@ -62,8 +62,12 @@ Requires:   %{name} = %{version}-%{release}
 
 %build
 # >> build pre
+export CFLAGS="${CFLAGS} %{optflags} -fPIC"
+export CXXFLAGS="${CXXFLAGS} %{optflags} -fPIC"
+export LD_AS_NEEDED=1
 
 pushd sipXsdpLib
+autoupdate
 %reconfigure \
 --prefix=%{_prefix} \
 --includedir=%{_includedir}/%{name} \

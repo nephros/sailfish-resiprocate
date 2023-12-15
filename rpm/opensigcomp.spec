@@ -51,9 +51,11 @@ Group:      Development
 pushd contrib/%{name}
 export CFLAGS="${CFLAGS} -Wno-error=write-strings -Wno-error=unused-but-set-variable -Wno-error=aggressive-loop-optimizations -Wno-error=overflow -w"
 export CXXFLAGS="${CXXFLAGS} -Wno-error=write-strings -Wno-error=unused-but-set-variable -Wno-error=aggressive-loop-optimizations -Wno-error=overflow -w"
-
+export CFLAGS="$CFLAGS -fPIC %{optflags}"
+export CXXFLAGS="$CXXFLAGS -fPIC %{optflags}"
+export LDFLAGS="$LDFLAGS -pie -shared"
 ./configure -y --prefix=%{_prefix}
-make -C src %{?_smp_mflags} libopensigcomp.a
+make -C src  %{?_smp_mflags} libopensigcomp.a
 # << build pre
 
 

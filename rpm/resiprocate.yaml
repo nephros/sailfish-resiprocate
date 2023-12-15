@@ -103,7 +103,7 @@ SubPackages:
       Summary: Libraries for %{name}
       Group: Libraries
       Files:
-        - '%{_libdir}/*'
+        # '%{_libdir}/*'
     - Name: telepathy-%{name}
       AsWholeName: true
       Summary: a connection manager for the Telepathy framework
@@ -116,10 +116,19 @@ SubPackages:
         It uses the high level reCon API from reSIProcate to co-ordinate
         SIP and media streams.  reCon also supports conferencing.
         The media stack from the sipXtapi project is used.
+      RequiresPostUn:
+        - systemd
+      RequiresPost:
+        - systemd
+      RequiresPre:
+        - systemd
+      RequiresPreUn:
+        - systemd
       Files:
          - '%license apps/telepathy/LICENSE.txt'
          - '%{_bindir}/telepathy-resiprocate'
          - '%{_datadir}/dbus-1/services/*'
+         - '%{_datadir}/telepathy/managers/resiprocate.manager'
 #    - Name: recon
 #      Summary: Development files for %{name}
 #      Group: Applications

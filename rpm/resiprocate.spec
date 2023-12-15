@@ -67,6 +67,10 @@ Group:      Libraries
 %package -n telepathy-%{name}
 Summary:    a connection manager for the Telepathy framework
 Group:      Applications
+Requires(pre): systemd
+Requires(preun): systemd
+Requires(post): systemd
+Requires(postun): systemd
 
 %description -n telepathy-%{name}
 %{summary}
@@ -92,6 +96,10 @@ The media stack from the sipXtapi project is used.
 # >> build pre
 sed -i "s/PKG_CHECK_MODULES(\[DEPS_PYTHON\], \[python >= 3.6\])/PKG_CHECK_MODULES(\[DEPS_PYTHON\], \[python3 >= 3.6\])/" configure.ac
 sed -i "s/QT_SELECT=qt5/QT_SELECT=5/" apps/telepathy/Makefile.*
+CFLAGS="${CFLAGS} %{optflags}"
+CXXFLAGS="${CXXFLAGS} %{optflags}"
+#CFLAGS="$CFLAGS -fPIC"
+#LDFLAGS="$LDFLAGS -pie -shared"
 CFLAGS="${CFLAGS} -I%{_includedir}/libsipXport"
 CXXFLAGS="${CXXFLAGS} -I%{_includedir}/libsipXport"
 CFLAGS="${CFLAGS} -I%{_includedir}/libsipXmedia"
@@ -158,30 +166,43 @@ autoupdate
 
 
 # >> build post
-make %{?_smp_mflags} -C rutil librutil.la
-make %{?_smp_mflags} -C resip/stack libresip.la
-make %{?_smp_mflags} -C resip/dum libdum.la
-make %{?_smp_mflags} -C reTurn libreTurnCommon.la
-make %{?_smp_mflags} -C reTurn/client libreTurnClient.la
-make %{?_smp_mflags} -C reflow libreflow.la
-make %{?_smp_mflags} -C resip/recon librecon.la
+make -C rutil librutil.la
+make -C resip/stack libresip.la
+make -C resip/dum libdum.la
+make -C reTurn libreTurnCommon.la
+make -C reTurn/client libreTurnClient.la
+make -C reflow libreflow.la
+make -C resip/recon librecon.la
 #make -C reflow %%{?_smp_mflags}
-make -C apps/telepathy %{?_smp_mflags}
+make -C apps/telepathy
 # << build post
 
 %install
 rm -rf %{buildroot}
 # >> install pre
 make DESTDIR=%{buildroot} -C apps/telepathy install
+
+install -d %{buildroot}%{_datadir}/telepathy/managers
+install -m644 apps/telepathy/resiprocate.manager %{buildroot}%{_datadir}/telepathy/managers
+
+# work around the fact that libtool doesn't install sometimes
+#install -m 755 reTurn/client/libreTurnClient.la %%{buildroot}%%{_libdir}/
+#install -m 755 reTurn/libreTurnCommon.la %%{buildroot}%%{_libdir}/
+#install -m 755 reflow/libreflow.la %%{buildroot}%%{_libdir}/
+#install -m 755 resip/dum/libdum.la %%{buildroot}%%{_libdir}/
+#install -m 755 resip/recon/librecon.la %%{buildroot}%%{_libdir}/
+#install -m 755 resip/stack/libresip.la %%{buildroot}%%{_libdir}/
+#install -m 755 rutil/librutil.la %%{buildroot}%%{_libdir}/
 # << install pre
 
 # >> install post
+sed -i "/^Exec/d" %{buildroot}%{_datadir}/dbus-1/services/org.freedesktop.Telepathy.ConnectionManager.resiprocate.service
+echo "Exec=%{_bindir}/telepathy-resiprocate" >> %{buildroot}%{_datadir}/dbus-1/services/org.freedesktop.Telepathy.ConnectionManager.resiprocate.service
 # << install post
 
 
 %files -n %{name}-libs
 %defattr(-,root,root,-)
-%{_libdir}/*
 # >> files %{name}-libs
 # << files %{name}-libs
 
@@ -190,5 +211,6 @@ make DESTDIR=%{buildroot} -C apps/telepathy install
 %license apps/telepathy/LICENSE.txt
 %{_bindir}/telepathy-resiprocate
 %{_datadir}/dbus-1/services/*
+%{_datadir}/telepathy/managers/resiprocate.manager
 # >> files telepathy-%{name}
 # << files telepathy-%{name}
