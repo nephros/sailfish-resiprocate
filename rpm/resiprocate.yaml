@@ -68,7 +68,7 @@ ConfigOptions:
   # '--help'
   - 'PKG_CONFIG_PATH="%{_libdir}/pkgconfig:${_prefix}/lib/pkgconfig:%{_datadir}/pkgconfig"'
   - 'PYCXX_SRCDIR="%{_datadir}/python%{python3_version}/CXX"'
-  - '--enable-static'
+  - '--enable-shared'
   - '--disable-pedantic-stack'
   - '--disable-assert-syslog'
   - '--disable-repro-plugins'
@@ -98,12 +98,18 @@ ConfigOptions:
 NoIconCache: true
 NoFiles: true
 SubPackages:
+    - Name: '%{name}-tools'
+      AsWholeName: true
+      Summary: Libraries for %{name}
+      Group: Libraries
+      Files:
+        - '%{_bindir}/rendIt'
     - Name: '%{name}-libs'
       AsWholeName: true
       Summary: Libraries for %{name}
       Group: Libraries
       Files:
-        # '%{_libdir}/*'
+        # '%{_libdir}/*.so.*'
     - Name: telepathy-%{name}
       AsWholeName: true
       Summary: a connection manager for the Telepathy framework
@@ -133,10 +139,12 @@ SubPackages:
 #      Summary: Development files for %{name}
 #      Group: Applications
 #      Files:
-#    - Name: devel
-#      Summary: Development files for %{name}
-#      Group: Development
-#      Files:
-#        # '%{_includedir}/*'
+    - Name: devel
+      Summary: Development files for %{name}
+      Group: Development
+      Files:
+        - '%{_includedir}/*'
+        - '%{_libdir}/*.so'
+        - '%{_libdir}/*.la'
 
 

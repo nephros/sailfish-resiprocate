@@ -57,6 +57,13 @@ PackageIcon: https://avatars.githubusercontent.com/u/2827263?s=48&v=4
 %endif
 
 
+%package -n %{name}-tools
+Summary:    Libraries for %{name}
+Group:      Libraries
+
+%description -n %{name}-tools
+%{summary}.
+
 %package -n %{name}-libs
 Summary:    Libraries for %{name}
 Group:      Libraries
@@ -81,6 +88,13 @@ It uses the high level reCon API from reSIProcate to co-ordinate
 SIP and media streams.  reCon also supports conferencing.
 The media stack from the sipXtapi project is used.
 
+
+%package devel
+Summary:    Development files for %{name}
+Group:      Development
+
+%description devel
+%{summary}.
 
 %prep
 %setup -q -n %{name}-%{name}-%{version}
@@ -139,7 +153,7 @@ autoupdate
 %reconfigure --disable-static \
     PKG_CONFIG_PATH="%{_libdir}/pkgconfig:${_prefix}/lib/pkgconfig:%{_datadir}/pkgconfig" \
     PYCXX_SRCDIR="%{_datadir}/python%{python3_version}/CXX" \
-    --enable-static \
+    --enable-shared \
     --disable-pedantic-stack \
     --disable-assert-syslog \
     --disable-repro-plugins \
@@ -166,20 +180,34 @@ autoupdate
 
 
 # >> build post
-make -C rutil librutil.la
-make -C resip/stack libresip.la
-make -C resip/dum libdum.la
-make -C reTurn libreTurnCommon.la
-make -C reTurn/client libreTurnClient.la
-make -C reflow libreflow.la
-make -C resip/recon librecon.la
+#make -C rutil librutil.la
+#make -C resip/stack libresip.la
+#make -C resip/dum libdum.la
+make %{?_smp_mflags} -C rutil
+make %{?_smp_mflags} -C resip/stack
+make %{?_smp_mflags} -C resip/dum
+make %{?_smp_mflags} -C reTurn libreTurnCommon.la
+make %{?_smp_mflags} -C reTurn/client libreTurnClient.la
+make %{?_smp_mflags} -C reTurn/client
+make %{?_smp_mflags} -C reflow
+make %{?_smp_mflags} -C resip
+pushd resip/recon
+make %{?_smp_mflags}
+popd
+make %{?_smp_mflags} -C reTurn
+#make -C reflow libreflow.la
+#make -C resip/recon librecon.la
+make %{?_smp_mflags} -C resip/recon ||:
 #make -C reflow %%{?_smp_mflags}
-make -C apps/telepathy
+make %{?_smp_mflags} -C apps/telepathy
+find . -name "*.so"
 # << build post
 
 %install
 rm -rf %{buildroot}
 # >> install pre
+make DESTDIR=%{buildroot} -C rutil install
+make DESTDIR=%{buildroot} -C resip install
 make DESTDIR=%{buildroot} -C apps/telepathy install
 
 install -d %{buildroot}%{_datadir}/telepathy/managers
@@ -201,6 +229,12 @@ echo "Exec=%{_bindir}/telepathy-resiprocate" >> %{buildroot}%{_datadir}/dbus-1/s
 # << install post
 
 
+%files -n %{name}-tools
+%defattr(-,root,root,-)
+%{_bindir}/rendIt
+# >> files %{name}-tools
+# << files %{name}-tools
+
 %files -n %{name}-libs
 %defattr(-,root,root,-)
 # >> files %{name}-libs
@@ -214,3 +248,11 @@ echo "Exec=%{_bindir}/telepathy-resiprocate" >> %{buildroot}%{_datadir}/dbus-1/s
 %{_datadir}/telepathy/managers/resiprocate.manager
 # >> files telepathy-%{name}
 # << files telepathy-%{name}
+
+%files devel
+%defattr(-,root,root,-)
+%{_includedir}/*
+%{_libdir}/*.so
+%{_libdir}/*.la
+# >> files devel
+# << files devel
