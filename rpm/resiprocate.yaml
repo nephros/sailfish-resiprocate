@@ -78,6 +78,8 @@ ConfigOptions:
   - '--with-popt'
   - '--with-ssl'
   - '--with-telepathy'
+  - '--with-radcli'
+  - '--with-sigcomp'
   - '--without-c-ares'
   - '--without-apps'
   - '--without-geoip'
@@ -87,29 +89,47 @@ ConfigOptions:
   - '--without-p2p'
   - '--without-postgresql'
   - '--without-python'
-  - '--with-radcli'
   - '--without-radius'
-  - '--without-recon'
+  # '--without-recon'
   - '--without-rend'
   - '--without-repro'
   # '--without-return'
-  - '--with-sigcomp'
   - '--without-tfm'
+
 NoIconCache: true
 NoFiles: true
 SubPackages:
+    - Name: 'moh-server'
+      Summary: Music-on-Hold Server
+      Group: Applications
+      Files:
+        - '%{_sbindir}/MOHParkServer'
+    - Name: 'turn-server'
+      Summary: TURN Server
+      Group: Applications
+      Files:
+        - '%{_sbindir}/reTurnServer'
+        - '%{_libdir}/%{name}/reTurnServer'
     - Name: '%{name}-tools'
       AsWholeName: true
-      Summary: Libraries for %{name}
-      Group: Libraries
+      Summary: Tools for %{name}
+      Group: Applications
       Files:
         - '%{_bindir}/rendIt'
+        - '%{_bindir}/testUA'
     - Name: '%{name}-libs'
       AsWholeName: true
       Summary: Libraries for %{name}
       Group: Libraries
       Files:
-        # '%{_libdir}/*.so.*'
+        - '%{_libdir}/libdum-*.so'
+        - '%{_libdir}/libreTurnClient-*.so'
+        - '%{_libdir}/libreTurnCommon-*.so'
+        - '%{_libdir}/librecon-*.so'
+        - '%{_libdir}/libreflow-*.so'
+        - '%{_libdir}/librend-*.so'
+        - '%{_libdir}/libresip-*.so'
+        - '%{_libdir}/librutil-*.so'
     - Name: telepathy-%{name}
       AsWholeName: true
       Summary: a connection manager for the Telepathy framework
@@ -131,20 +151,21 @@ SubPackages:
       RequiresPreUn:
         - systemd
       Files:
-         - '%license apps/telepathy/LICENSE.txt'
-         - '%{_bindir}/telepathy-resiprocate'
-         - '%{_datadir}/dbus-1/services/*'
-         - '%{_datadir}/telepathy/managers/resiprocate.manager'
-#    - Name: recon
-#      Summary: Development files for %{name}
-#      Group: Applications
-#      Files:
+        - '%license apps/telepathy/LICENSE.txt'
+        - '%{_bindir}/telepathy-resiprocate'
+        - '%{_datadir}/dbus-1/services/*'
+        - '%{_datadir}/telepathy/managers/resiprocate.manager'
     - Name: devel
       Summary: Development files for %{name}
       Group: Development
       Files:
         - '%{_includedir}/*'
-        - '%{_libdir}/*.so'
-        - '%{_libdir}/*.la'
-
+        - '%{_libdir}/libdum.so'
+        - '%{_libdir}/libreTurnClient.so'
+        - '%{_libdir}/libreTurnCommon.so'
+        - '%{_libdir}/librecon.so'
+        - '%{_libdir}/libreflow.so'
+        - '%{_libdir}/librend.so'
+        - '%{_libdir}/libresip.so'
+        - '%{_libdir}/librutil.so'
 

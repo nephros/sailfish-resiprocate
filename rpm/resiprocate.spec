@@ -57,9 +57,23 @@ PackageIcon: https://avatars.githubusercontent.com/u/2827263?s=48&v=4
 %endif
 
 
+%package moh-server
+Summary:    Music-on-Hold Server
+Group:      Applications
+
+%description moh-server
+%{summary}.
+
+%package turn-server
+Summary:    TURN Server
+Group:      Applications
+
+%description turn-server
+%{summary}.
+
 %package -n %{name}-tools
-Summary:    Libraries for %{name}
-Group:      Libraries
+Summary:    Tools for %{name}
+Group:      Applications
 
 %description -n %{name}-tools
 %{summary}.
@@ -67,6 +81,8 @@ Group:      Libraries
 %package -n %{name}-libs
 Summary:    Libraries for %{name}
 Group:      Libraries
+Requires(post): /sbin/ldconfig
+Requires(postun): /sbin/ldconfig
 
 %description -n %{name}-libs
 %{summary}.
@@ -161,6 +177,8 @@ autoupdate
     --with-popt \
     --with-ssl \
     --with-telepathy \
+    --with-radcli \
+    --with-sigcomp \
     --without-c-ares \
     --without-apps \
     --without-geoip \
@@ -170,12 +188,9 @@ autoupdate
     --without-p2p \
     --without-postgresql \
     --without-python \
-    --with-radcli \
     --without-radius \
-    --without-recon \
     --without-rend \
     --without-repro \
-    --with-sigcomp \
     --without-tfm
 
 
@@ -188,17 +203,13 @@ make %{?_smp_mflags} -C resip/stack
 make %{?_smp_mflags} -C resip/dum
 make %{?_smp_mflags} -C reTurn libreTurnCommon.la
 make %{?_smp_mflags} -C reTurn/client libreTurnClient.la
-make %{?_smp_mflags} -C reTurn/client
+#make %%{?_smp_mflags} -C reTurn/client
 make %{?_smp_mflags} -C reflow
-make %{?_smp_mflags} -C resip
+#make %%{?_Smp_mflags} -C resip
 pushd resip/recon
 make %{?_smp_mflags}
 popd
 make %{?_smp_mflags} -C reTurn
-#make -C reflow libreflow.la
-#make -C resip/recon librecon.la
-make %{?_smp_mflags} -C resip/recon ||:
-#make -C reflow %%{?_smp_mflags}
 make %{?_smp_mflags} -C apps/telepathy
 find . -name "*.so"
 # << build post
@@ -208,35 +219,61 @@ rm -rf %{buildroot}
 # >> install pre
 make DESTDIR=%{buildroot} -C rutil install
 make DESTDIR=%{buildroot} -C resip install
+make DESTDIR=%{buildroot} -C reTurn install
+make DESTDIR=%{buildroot} -C reTurn/client install
+make DESTDIR=%{buildroot} -C reflow install
+make DESTDIR=%{buildroot} -C resip/recon install
 make DESTDIR=%{buildroot} -C apps/telepathy install
 
 install -d %{buildroot}%{_datadir}/telepathy/managers
 install -m644 apps/telepathy/resiprocate.manager %{buildroot}%{_datadir}/telepathy/managers
-
-# work around the fact that libtool doesn't install sometimes
-#install -m 755 reTurn/client/libreTurnClient.la %%{buildroot}%%{_libdir}/
-#install -m 755 reTurn/libreTurnCommon.la %%{buildroot}%%{_libdir}/
-#install -m 755 reflow/libreflow.la %%{buildroot}%%{_libdir}/
-#install -m 755 resip/dum/libdum.la %%{buildroot}%%{_libdir}/
-#install -m 755 resip/recon/librecon.la %%{buildroot}%%{_libdir}/
-#install -m 755 resip/stack/libresip.la %%{buildroot}%%{_libdir}/
-#install -m 755 rutil/librutil.la %%{buildroot}%%{_libdir}/
 # << install pre
 
 # >> install post
+find %{buildroot} -regex ".*\.la$" | xargs rm -f --
+rm -rf %{buildroot}%{_docdir}
+rm -rf %{buildroot}%{_mandir}
+
+# Fix exec path, which points to /home/foo
 sed -i "/^Exec/d" %{buildroot}%{_datadir}/dbus-1/services/org.freedesktop.Telepathy.ConnectionManager.resiprocate.service
 echo "Exec=%{_bindir}/telepathy-resiprocate" >> %{buildroot}%{_datadir}/dbus-1/services/org.freedesktop.Telepathy.ConnectionManager.resiprocate.service
 # << install post
 
+%post -n %{name}-libs -p /sbin/ldconfig
+
+%postun -n %{name}-libs -p /sbin/ldconfig
+
+
+%files moh-server
+%defattr(-,root,root,-)
+%{_sbindir}/MOHParkServer
+# >> files moh-server
+# << files moh-server
+
+%files turn-server
+%defattr(-,root,root,-)
+%{_sbindir}/reTurnServer
+%{_libdir}/%{name}/reTurnServer
+# >> files turn-server
+# << files turn-server
 
 %files -n %{name}-tools
 %defattr(-,root,root,-)
 %{_bindir}/rendIt
+%{_bindir}/testUA
 # >> files %{name}-tools
 # << files %{name}-tools
 
 %files -n %{name}-libs
 %defattr(-,root,root,-)
+%{_libdir}/libdum-*.so
+%{_libdir}/libreTurnClient-*.so
+%{_libdir}/libreTurnCommon-*.so
+%{_libdir}/librecon-*.so
+%{_libdir}/libreflow-*.so
+%{_libdir}/librend-*.so
+%{_libdir}/libresip-*.so
+%{_libdir}/librutil-*.so
 # >> files %{name}-libs
 # << files %{name}-libs
 
@@ -252,7 +289,13 @@ echo "Exec=%{_bindir}/telepathy-resiprocate" >> %{buildroot}%{_datadir}/dbus-1/s
 %files devel
 %defattr(-,root,root,-)
 %{_includedir}/*
-%{_libdir}/*.so
-%{_libdir}/*.la
+%{_libdir}/libdum.so
+%{_libdir}/libreTurnClient.so
+%{_libdir}/libreTurnCommon.so
+%{_libdir}/librecon.so
+%{_libdir}/libreflow.so
+%{_libdir}/librend.so
+%{_libdir}/libresip.so
+%{_libdir}/librutil.so
 # >> files devel
 # << files devel
